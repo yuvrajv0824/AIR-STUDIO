@@ -91,14 +91,15 @@ body { width:100%; height:100vh; overflow:hidden; background:var(--bg); color:va
 .pause-text { font-family:'Bebas Neue',sans-serif; font-size:108px; letter-spacing:10px; color:rgba(192,132,252,0.95); text-shadow:0 0 40px rgba(192,132,252,0.65); animation:pausePulse 2.4s infinite; font-weight:700; }
 @keyframes pausePulse { 0%,100%{ opacity:0.65; transform:scale(0.98); } 50%{ opacity:1; transform:scale(1.04); } }
 
-#app { display:grid; grid-template-rows:50px 1fr 38px; height:100vh; border:2px solid var(--border); }
-#header { display:flex; align-items:stretch; border-bottom:3px solid var(--fg); background:linear-gradient(90deg, var(--fg), #f0f0f0); color:var(--bg); overflow:hidden; }
-.h-logo { font-family:'Bebas Neue',sans-serif; font-size:30px; letter-spacing:5px; background:linear-gradient(135deg, var(--acc), #E0AAFF); color:#000; padding:0 26px; display:flex; align-items:center; border-right:3px solid #000; flex-shrink:0; font-weight:700; }
-.h-tag { font-size:9px; letter-spacing:4px; text-transform:uppercase; color:rgba(0,0,0,0.52); padding:0 20px; display:flex; align-items:center; flex:1; font-weight:600; }
-.h-stats { display:flex; align-items:center; border-left:2px solid rgba(0,0,0,0.12); }
-.h-cell { display:flex; align-items:center; gap:9px; padding:0 18px; height:100%; border-right:1px solid rgba(0,0,0,0.1); font-size:9px; letter-spacing:2px; text-transform:uppercase; color:rgba(0,0,0,0.6); font-weight:600; cursor:pointer; transition:all 0.2s; }
-.h-cell:hover { background:rgba(192,132,252,0.12); }
-.h-cell:last-child { border-right:none; }
+#app { display:grid; grid-template-rows:44px 1fr 3px; height:100vh; border:1px solid var(--border); }
+#bottom-bar { height:3px; background:linear-gradient(90deg, var(--border) 0%, rgba(192,132,252,0.6) 50%, var(--border) 100%); flex-shrink:0; }
+#header { display:flex; align-items:stretch; border-bottom:1px solid var(--border); background:#09090c; color:var(--fg); overflow-x:auto; overflow-y:hidden; flex-shrink:0; }
+.h-logo { font-family:'Bebas Neue',sans-serif; font-size:23px; letter-spacing:3px; background:#09090c; color:#C084FC; padding:0 18px; display:flex; align-items:center; border-right:1px solid var(--border); flex-shrink:0; font-weight:700; user-select:none; }
+.h-stats { display:flex; align-items:stretch; flex:1; overflow:hidden; }
+.h-cell { display:flex; align-items:center; justify-content:center; gap:7px; padding:0 10px; height:100%; flex:1; border-right:1px solid var(--border); font-size:8.5px; letter-spacing:1.5px; text-transform:uppercase; color:var(--dim); font-weight:600; white-space:nowrap; transition:all 0.15s; }
+.h-cell .h-val { color:#FFFFFF; font-weight:700; font-family:'IBM Plex Mono',monospace; font-size:11px; }
+.h-cell .h-val.acc { color:var(--acc); }
+.h-cell:hover { background:rgba(192,132,252,0.06); }
 .h-cell.privacy-on { background:rgba(192,132,252,0.35); color:#fff; }
 
 .dot { width:12px; height:12px; border-radius:50%; flex-shrink:0; transition:all 0.35s; }
@@ -417,22 +418,27 @@ input[type=range]#sens::-webkit-slider-thumb:hover { background:var(--acc); box-
 
   <div id="header">
     <div class="h-logo">AIR//STUDIO</div>
-    <div class="h-tag">v3.3 PROFESSIONAL &nbsp;//&nbsp; ADVANCED SYSTEM</div>
     <div class="h-stats">
+      <div class="h-cell"><span style="color:var(--dim);">FPS</span> <span class="h-val acc" id="f-fps">--</span></div>
+      <div class="h-cell"><span style="color:var(--dim);">VOICES</span> <span class="h-val" id="f-voices">00</span></div>
+      <div class="h-cell"><span style="color:var(--dim);">LAT</span> <span class="h-val" id="f-lat">--ms</span></div>
+      <div class="h-cell"><span style="color:var(--dim);">CPU</span> <span class="h-val" id="f-cpu">--%</span></div>
       <div class="h-cell">
         <div class="dot off" id="dot-cam"></div>
-        CAM <span id="lbl-cam">OFF</span>
+        <span style="color:var(--dim);">CAM</span> <span class="h-val" id="lbl-cam">OFF</span>
       </div>
       <div class="h-cell">
         <div class="dot off" id="dot-hands"></div>
-        HANDS <span id="lbl-hands">0</span>
+        <span style="color:var(--dim);">HANDS</span> <span class="h-val acc" id="lbl-hands">0</span>
       </div>
       <div class="h-cell">
         <div class="dot off" id="dot-motion"></div>
-        MOTION <span id="lbl-motion">IDLE</span>
+        <span style="color:var(--dim);">MOTION</span> <span class="h-val acc" id="lbl-motion">IDLE</span>
       </div>
-      <div class="h-cell" id="header-privacy-cell" onclick="togglePrivacy()">
-        PRIVACY <span id="lbl-privacy">OFF</span>
+      <div class="h-cell"><span style="color:var(--dim);">CONF</span> <span class="h-val" id="f-conf">---%</span></div>
+      <div class="h-cell"><span style="color:var(--dim);">SYS</span> <span class="h-val acc" id="f-sys">READY</span></div>
+      <div class="h-cell" id="header-privacy-cell" onclick="togglePrivacy()" style="cursor:pointer;">
+        <span style="color:var(--dim);">PRIVACY</span> <span class="h-val" id="lbl-privacy">OFF</span>
       </div>
     </div>
   </div>
@@ -532,15 +538,7 @@ input[type=range]#sens::-webkit-slider-thumb:hover { background:var(--acc); box-
 
   </div>
 
-  <div id="footer">
-    <div class="fc"><div class="fk">Mode</div><div class="fv acc" id="f-inst">---</div></div>
-    <div class="fc"><div class="fk">FPS</div><div class="fv" id="f-fps">--</div></div>
-    <div class="fc"><div class="fk">Voices</div><div class="fv" id="f-voices">00</div></div>
-    <div class="fc"><div class="fk">Latency</div><div class="fv" id="f-lat">--ms</div></div>
-    <div class="fc"><div class="fk">Sensitivity</div><div class="fv" id="f-sens">--</div></div>
-    <div class="fc"><div class="fk">Conf</div><div class="fv" id="f-conf">---%</div></div>
-    <div class="fc"><div class="fk">Status</div><div class="fv ok" id="f-sys">OFFLINE</div></div>
-  </div>
+  <div id="bottom-bar"></div>
 
 </div>
 
