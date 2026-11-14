@@ -209,22 +209,20 @@ input[type=range]#sens::-webkit-slider-thumb:hover { background:var(--acc); box-
 .drum-cluster { display:grid; grid-template-columns:minmax(0,1fr); gap:8px; min-width:0; min-height:0; }
 .drum-cluster.left-cluster { grid-column:1; grid-row:2; }
 .drum-cluster.right-cluster { grid-column:2; grid-row:2; }
-.pad { position:relative; width:100%; aspect-ratio:1.8; min-height:46px; max-height:64px; min-width:0; display:flex; align-items:center; justify-content:center; cursor:pointer; transition:transform 0.12s, filter 0.12s; border-radius:4px; overflow:hidden; }
-.pad:hover { transform:translateY(-2px); filter:brightness(1.15); }
+.pad { position:relative; width:100%; aspect-ratio:1.8; min-height:46px; max-height:64px; min-width:0; display:flex; align-items:center; justify-content:center; cursor:pointer; transition:transform 0.12s cubic-bezier(0.05, 0.7, 0.1, 1.0), filter 0.12s; border-radius:8px; overflow:hidden; box-sizing:border-box; }
+.pad:hover { transform:translateY(-1px); filter:brightness(1.12); }
 
-.pad.cymbal-pad .drum-body { background:radial-gradient(circle, #c49646 0%, #7d501d 100%); border:2px solid #e0aa53; }
-.pad.cymbal-pad .drum-center { background:radial-gradient(circle, #fde293 0%, #aa7a28 100%); font-size:15px; }
+.pad.cymbal-pad .drum-body { border:1.5px solid #e0aa53; }
+.pad.drum-pad .drum-body { border:1.5px solid rgba(180, 200, 215, 0.65); }
 
-.pad.drum-pad .drum-body { background:linear-gradient(145deg, #2c363f, #182026); border:2px solid rgba(180, 200, 215, 0.7); }
-.pad.drum-pad .drum-center { background:radial-gradient(circle, #ded7c7 0%, #b8ad96 100%); font-size:15px; }
+.drum-body { position:absolute; inset:0; border-radius:8px; box-shadow:inset 0 1px rgba(255,255,255,0.15), 0 3px 8px rgba(0,0,0,0.5); }
+.drum-rim { position:absolute; inset:3px; border-radius:6px; border:1px solid rgba(255,255,255,0.22); pointer-events:none; }
+.drum-center { position:absolute; inset:6px; border-radius:5px; display:flex; flex-direction:column; align-items:center; justify-content:center; z-index:2; gap:2px; }
+.pad-icon { display:flex; align-items:center; justify-content:center; }
+.pad-label { position:absolute; left:2px; right:2px; bottom:2px; z-index:3; overflow:hidden; color:#FFFFFF; font-size:7.5px; font-weight:700; text-align:center; text-shadow:none; letter-spacing:0.5px; }
 
-.drum-body { position:absolute; inset:0; border-radius:6px; box-shadow:inset 0 1px rgba(255,255,255,0.15), 0 4px 10px rgba(0,0,0,0.5); }
-.drum-rim { position:absolute; inset:4px; border-radius:4px; border:1px solid rgba(255,255,255,0.3); pointer-events:none; }
-.drum-center { position:absolute; inset:8px; border-radius:4px; display:flex; align-items:center; justify-content:center; z-index:2; }
-.pad-label { position:absolute; left:2px; right:2px; bottom:2px; z-index:3; overflow:hidden; color:#FFFFFF; font-size:7.5px; font-weight:700; text-align:center; text-shadow:0 1px 2px #000; letter-spacing:0.5px; }
-
-.pad.lit { transform:scale(0.96); filter:brightness(1.4); }
-.pad.lit .drum-body { box-shadow:0 0 24px rgba(192,132,252,0.85); }
+.pad.lit { transform:scale(0.97); filter:brightness(1.35); }
+.pad.lit .drum-body { border-color:var(--acc); box-shadow:inset 0 0 10px rgba(192, 132, 252, 0.4); }
 
 #pad-grid[data-layout="mini"] .drum-cluster { gap:6px; }
 #pad-grid[data-layout="mini"] .pad-label { font-size:7px; }
@@ -1180,6 +1178,22 @@ function buildUI() {
   }
 }
 
+function getDrumSVG(drumId, type) {
+  if (type === 'cymbal') {
+    if (drumId === 'closed_hat' || drumId === 'open_hat') {
+      return `<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8"><ellipse cx="12" cy="8" rx="7" ry="2.5"/><ellipse cx="12" cy="14" rx="7" ry="2.5"/><line x1="12" y1="4" x2="12" y2="18"/></svg>`;
+    }
+    return `<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8"><ellipse cx="12" cy="12" rx="9" ry="5"/><circle cx="12" cy="12" r="2" fill="currentColor"/></svg>`;
+  }
+  if (drumId === 'snare') {
+    return `<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="6" width="18" height="10" rx="2"/><line x1="4" y1="11" x2="20" y2="11" stroke-dasharray="2 1.5"/></svg>`;
+  }
+  if (drumId === 'bass') {
+    return `<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3.5"/><line x1="7" y1="18" x2="17" y2="18"/></svg>`;
+  }
+  return `<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8"><ellipse cx="12" cy="7" rx="8" ry="3.5"/><path d="M4 7v8c0 1.9 3.6 3.5 8 3.5s8-1.6 8-3.5V7"/></svg>`;
+}
+
 function buildDrumPads() {
   const grid = document.getElementById('pad-grid');
   grid.innerHTML = '';
@@ -1192,12 +1206,20 @@ function buildDrumPads() {
     d.className = 'pad ' + (p.type === 'cymbal' ? 'cymbal-pad' : 'drum-pad');
     d.id = 'pad-' + p.id;
     d.onclick = () => triggerDrumHit(p.id, 1);
-    const icon = p.type === 'cymbal' ? 'CYM' : 'DRM';
+    const iconSVG = getDrumSVG(p.id, p.type);
+    
+    // Dynamic authentic drum shell/cymbal lacquer background
+    const bg = p.type === 'cymbal' 
+      ? `radial-gradient(circle at 50% 25%, ${p.color}33 0%, rgba(18, 14, 8, 0.95) 85%)`
+      : `radial-gradient(circle at 50% 25%, ${p.color}28 0%, rgba(10, 14, 18, 0.95) 85%)`;
+
     d.innerHTML = `
-      <div class="drum-body" style="border-color:${p.ring}"></div>
-      <div class="drum-rim" style="border-color:${p.color}"></div>
-      <div class="drum-center" style="color:${p.color}">${icon}</div>
-      <div class="pad-label">${p.label} [${p.key}]</div>
+      <div class="drum-body" style="background:${bg}; border-color:${p.ring};"></div>
+      <div class="drum-rim" style="border-color:${p.color}88;"></div>
+      <div class="drum-center" style="color:${p.color};">
+        <div class="pad-icon">${iconSVG}</div>
+      </div>
+      <div class="pad-label">${p.label} <span style="color:${p.color};">[${p.key}]</span></div>
     `;
     grid.appendChild(d);
   });
