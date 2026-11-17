@@ -231,15 +231,15 @@ input[type=range]#sens::-webkit-slider-thumb:hover { background:var(--acc); box-
 #piano-keys.gone { display:none; }
 #piano-keys.xylo-mode { background:rgba(12,12,12,0.9); height:auto; gap:3px; padding:8px; }
 
-.pk { position:relative; flex:1; display:flex; flex-direction:column; align-items:center; justify-content:flex-end; padding-bottom:10px; gap:2px; transition:all 0.08s; }
-.pk.white { background:linear-gradient(180deg, #f9f9f5, #dcdcd4); border:1px solid #999; border-radius:0 0 4px 4px; z-index:1; box-shadow:inset 0 -6px 12px -6px rgba(0,0,0,0.3), 0 0 0 1px rgba(0,0,0,0.15); }
-.pk.white .pk-nm { color:#333; }
-.pk.white.lit { background:linear-gradient(180deg, var(--acc), #E0AAFF); box-shadow:0 0 14px rgba(192,132,252,0.6), 0 0 0 1px rgba(0,0,0,0.2); }
+.pk { position:relative; flex:1; display:flex; flex-direction:column; align-items:center; justify-content:flex-end; padding-bottom:10px; gap:2px; transition:transform 0.08s cubic-bezier(0.05, 0.7, 0.1, 1.0), background 0.08s, box-shadow 0.08s; }
+.pk.white { background:linear-gradient(180deg, #f9f9f5, #dcdcd4); border:1px solid #999; border-radius:0 0 5px 5px; z-index:1; box-shadow:inset 0 -6px 12px -6px rgba(0,0,0,0.3), 0 0 0 1px rgba(0,0,0,0.15); }
+.pk.white .pk-nm { color:#333; font-weight:700; font-size:8.5px; }
+.pk.white.lit { transform:translateY(1.5px); background:linear-gradient(180deg, var(--acc), #E0AAFF); box-shadow:0 0 14px rgba(192,132,252,0.6), 0 0 0 1px rgba(0,0,0,0.2); }
 .pk.white.lit .pk-nm { color:#000; font-weight:700; }
 
 .pk.black { position:absolute; flex:none; width:7.5%; height:65%; top:0; background:linear-gradient(180deg, #353535, #0a0a0a); border:1px solid #000; border-radius:0 0 4px 4px; z-index:2; box-shadow:0 5px 10px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.04); justify-content:flex-end; padding-bottom:7px; }
 .pk.black .pk-nm { color:#888; font-size:8px; }
-.pk.black.lit { background:linear-gradient(180deg, var(--acc), #7B2CBF); box-shadow:0 0 14px rgba(192,132,252,0.8), 0 0 0 1px rgba(0,0,0,0.2); }
+.pk.black.lit { transform:translateY(1.5px); background:linear-gradient(180deg, var(--acc), #7B2CBF); box-shadow:0 0 14px rgba(192,132,252,0.8), 0 0 0 1px rgba(0,0,0,0.2); }
 .pk.black.lit .pk-nm { color:#000; font-weight:700; }
 
 .pk.xylo { position:relative; flex:1; height:88px; border-radius:6px; display:flex; align-items:flex-end; justify-content:center; padding-bottom:10px; border:none; box-shadow:0 4px 0 rgba(0,0,0,0.4) inset; transition:all 0.1s; }
@@ -1483,79 +1483,87 @@ function drawARPianoOverlay(ctx, W, H) {
 
   ctx.save();
   // Frame Backdrop
-  ctx.fillStyle = 'rgba(8, 12, 18, 0.60)';
+  ctx.fillStyle = 'rgba(10, 10, 15, 0.72)';
   ctx.fillRect(geom.padX - 8, geom.topY - 26, geom.keyboardW + 16, geom.keyboardH + 34);
 
   // Cyber Border & Header
-  ctx.strokeStyle = 'rgba(0, 229, 255, 0.45)';
+  ctx.strokeStyle = 'rgba(192, 132, 252, 0.45)';
   ctx.lineWidth = 1.5;
   ctx.strokeRect(geom.padX - 8, geom.topY - 26, geom.keyboardW + 16, geom.keyboardH + 34);
 
-  ctx.fillStyle = '#00E5FF';
+  ctx.fillStyle = '#C084FC';
   ctx.font = '700 9px "IBM Plex Mono", monospace';
   ctx.textAlign = 'left';
-  ctx.fillText('// AR CAMERA KEYBED — CHROMATIC C4 TO C5 (MULTI-FINGER TRACKING)', geom.padX + 2, geom.topY - 10);
+  ctx.fillText('// AR KEYBED — CHROMATIC C4 TO C5 (EMA SMOOTHED · ZERO-CLASH DEADZONES)', geom.padX + 2, geom.topY - 10);
 
-  // 1. Draw White Keys
+  // 1. Draw White Keys with 4px distinct spacing groove
   geom.whiteBoxes.forEach(k => {
     const isLit = keyHitStates[k.id] && (now - keyHitStates[k.id] < 180);
     const hoverVal = hoveredKeys[k.id] || 0;
 
     let fillGrad = ctx.createLinearGradient(k.x, k.y, k.x, k.y2);
     if (isLit) {
-      fillGrad.addColorStop(0, 'rgba(255, 245, 120, 0.95)');
-      fillGrad.addColorStop(1, 'rgba(245, 210, 0, 0.85)');
+      fillGrad.addColorStop(0, '#FFFFFF');
+      fillGrad.addColorStop(1, '#D8B4FE');
     } else if (hoverVal > 0) {
-      fillGrad.addColorStop(0, `rgba(0, 229, 255, ${0.28 + hoverVal * 0.35})`);
-      fillGrad.addColorStop(1, `rgba(0, 160, 255, ${0.18 + hoverVal * 0.25})`);
+      fillGrad.addColorStop(0, `rgba(192, 132, 252, ${0.25 + hoverVal * 0.30})`);
+      fillGrad.addColorStop(1, `rgba(147, 51, 234, ${0.18 + hoverVal * 0.22})`);
     } else {
-      fillGrad.addColorStop(0, 'rgba(240, 245, 250, 0.22)');
-      fillGrad.addColorStop(1, 'rgba(210, 220, 230, 0.12)');
+      fillGrad.addColorStop(0, 'rgba(245, 245, 250, 0.24)');
+      fillGrad.addColorStop(1, 'rgba(215, 215, 225, 0.12)');
     }
 
     ctx.fillStyle = fillGrad;
-    ctx.fillRect(k.x + 1.5, k.y, k.w - 3, k.h);
+    ctx.fillRect(k.x + 2, k.y, k.w - 4, k.h);
 
-    ctx.strokeStyle = isLit ? '#FFFFFF' : hoverVal > 0 ? 'rgba(0, 229, 255, 0.85)' : 'rgba(255, 255, 255, 0.22)';
+    ctx.strokeStyle = isLit ? '#C084FC' : hoverVal > 0 ? 'rgba(192, 132, 252, 0.85)' : 'rgba(255, 255, 255, 0.20)';
     ctx.lineWidth = isLit ? 2.5 : 1;
-    ctx.strokeRect(k.x + 1.5, k.y, k.w - 3, k.h);
+    ctx.strokeRect(k.x + 2, k.y, k.w - 4, k.h);
 
-    ctx.fillStyle = isLit ? '#000000' : '#EFEFEF';
-    ctx.font = isLit ? '700 16px "Bebas Neue", sans-serif' : '700 14px "Bebas Neue", sans-serif';
-    ctx.letterSpacing = '1px';
+    ctx.fillStyle = isLit ? '#000000' : '#FFFFFF';
+    ctx.font = isLit ? '800 16px "IBM Plex Mono", monospace' : '700 14px "IBM Plex Mono", monospace';
     ctx.textAlign = 'center';
-    ctx.fillText(k.label, k.x + k.w / 2, geom.bottomY - 24);
+    ctx.fillText(k.label, k.x + k.w / 2, k.y2 - 24);
   });
 
-  // 2. Draw Black Keys (Elevated on top)
+  // Acoustic demarcation line separating upper black-key zone from lower white-key strike zone
+  ctx.strokeStyle = 'rgba(192, 132, 252, 0.20)';
+  ctx.lineWidth = 1;
+  ctx.setLineDash([3, 3]);
+  ctx.beginPath();
+  ctx.moveTo(geom.padX, geom.topY + geom.blackKeyH);
+  ctx.lineTo(geom.padX + geom.keyboardW, geom.topY + geom.blackKeyH);
+  ctx.stroke();
+  ctx.setLineDash([]);
+
+  // 2. Draw Black Keys (Elevated on top with clean bevels)
   geom.blackBoxes.forEach(k => {
     const isLit = keyHitStates[k.id] && (now - keyHitStates[k.id] < 180);
     const hoverVal = hoveredKeys[k.id] || 0;
 
     let fillGrad = ctx.createLinearGradient(k.x, k.y, k.x, k.y2);
     if (isLit) {
-      fillGrad.addColorStop(0, 'rgba(255, 180, 0, 0.98)');
-      fillGrad.addColorStop(1, 'rgba(245, 255, 0, 0.90)');
+      fillGrad.addColorStop(0, '#C084FC');
+      fillGrad.addColorStop(1, '#9333EA');
     } else if (hoverVal > 0) {
-      fillGrad.addColorStop(0, `rgba(0, 180, 255, ${0.7 + hoverVal * 0.25})`);
-      fillGrad.addColorStop(1, `rgba(0, 100, 200, ${0.85 + hoverVal * 0.15})`);
+      fillGrad.addColorStop(0, `rgba(192, 132, 252, ${0.75 + hoverVal * 0.20})`);
+      fillGrad.addColorStop(1, `rgba(126, 34, 206, ${0.88 + hoverVal * 0.12})`);
     } else {
-      fillGrad.addColorStop(0, 'rgba(32, 36, 44, 0.92)');
-      fillGrad.addColorStop(1, 'rgba(12, 14, 18, 0.96)');
+      fillGrad.addColorStop(0, 'rgba(28, 28, 36, 0.95)');
+      fillGrad.addColorStop(1, 'rgba(12, 12, 16, 0.98)');
     }
 
     ctx.fillStyle = fillGrad;
-    ctx.fillRect(k.x, k.y, k.w, k.h);
+    ctx.fillRect(k.x + 1, k.y, k.w - 2, k.h);
 
-    ctx.strokeStyle = isLit ? '#FFFFFF' : hoverVal > 0 ? '#00E5FF' : 'rgba(0, 0, 0, 0.88)';
+    ctx.strokeStyle = isLit ? '#FFFFFF' : hoverVal > 0 ? '#C084FC' : 'rgba(0, 0, 0, 0.92)';
     ctx.lineWidth = isLit ? 2 : 1.2;
-    ctx.strokeRect(k.x, k.y, k.w, k.h);
+    ctx.strokeRect(k.x + 1, k.y, k.w - 2, k.h);
 
-    ctx.fillStyle = isLit ? '#000000' : 'rgba(255, 255, 255, 0.95)';
-    ctx.font = isLit ? '700 14px "Bebas Neue", sans-serif' : '700 12px "Bebas Neue", sans-serif';
-    ctx.letterSpacing = '1px';
+    ctx.fillStyle = isLit ? '#000000' : 'rgba(255, 255, 255, 0.92)';
+    ctx.font = '700 10px "IBM Plex Mono", monospace';
     ctx.textAlign = 'center';
-    ctx.fillText(k.label, k.x + k.w / 2, k.y2 - 16);
+    ctx.fillText(k.label, k.x + k.w / 2, k.y2 - 12);
   });
   ctx.restore();
 }
