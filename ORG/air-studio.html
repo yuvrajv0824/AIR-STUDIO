@@ -242,9 +242,9 @@ input[type=range]#sens::-webkit-slider-thumb:hover { background:var(--acc); box-
 .pk.black.lit { transform:translateY(1.5px); background:linear-gradient(180deg, var(--acc), #7B2CBF); box-shadow:0 0 14px rgba(192,132,252,0.8), 0 0 0 1px rgba(0,0,0,0.2); }
 .pk.black.lit .pk-nm { color:#000; font-weight:700; }
 
-.pk.xylo { position:relative; flex:1; height:88px; border-radius:6px; display:flex; align-items:flex-end; justify-content:center; padding-bottom:10px; border:none; box-shadow:0 4px 0 rgba(0,0,0,0.4) inset; transition:all 0.1s; }
-.pk.xylo .pk-nm { color:rgba(0,0,0,0.65); font-weight:700; }
-.pk.xylo.lit { filter:brightness(1.45); box-shadow:0 0 16px 3px rgba(255,255,255,0.7); }
+.pk.xylo { position:relative; flex:1; height:88px; border-radius:6px; display:flex; align-items:flex-end; justify-content:center; padding-bottom:10px; border:none; box-shadow:inset 0 3px 0 rgba(255,255,255,0.22), inset 0 -3px 0 rgba(0,0,0,0.35); transition:transform 0.08s cubic-bezier(0.05, 0.7, 0.1, 1.0), filter 0.08s; }
+.pk.xylo .pk-nm { color:rgba(0,0,0,0.72); font-weight:800; }
+.pk.xylo.lit { transform:translateY(2px); filter:brightness(1.35); box-shadow:0 0 16px 3px rgba(192,132,252,0.6); }
 .xylo-0 { background:#e63946; }
 .xylo-1 { background:#f4862e; }
 .xylo-2 { background:#f6c90e; }
@@ -1723,6 +1723,25 @@ function drawARXylophoneOverlay(ctx, W, H) {
   const now = performance.now();
 
   ctx.save();
+  // Frame Backdrop & Header
+  ctx.fillStyle = 'rgba(10, 10, 15, 0.72)';
+  ctx.fillRect(padX - 8, topY - 26, keyboardW + 16, (bottomY - topY) + 34);
+  ctx.strokeStyle = 'rgba(192, 132, 252, 0.45)';
+  ctx.lineWidth = 1.5;
+  ctx.strokeRect(padX - 8, topY - 26, keyboardW + 16, (bottomY - topY) + 34);
+
+  ctx.fillStyle = '#C084FC';
+  ctx.font = '700 9px "IBM Plex Mono", monospace';
+  ctx.textAlign = 'left';
+  ctx.fillText('// AR XYLOPHONE — DIATONIC C5 TO B5 (NODAL ISOLATION MOUNTS)', padX + 2, topY - 10);
+
+  // Horizontal Rubber Cushion Mounting Rails
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.08)';
+  ctx.fillRect(padX, topY + (bottomY - topY) * 0.28, keyboardW, 6);
+  ctx.fillRect(padX, topY + (bottomY - topY) * 0.75, keyboardW, 6);
+
+  // Tone Bars
+  const colors = ['#e63946', '#f4862e', '#f6c90e', '#2ec25c', '#1fa6c9', '#3654d1', '#8e3bc4'];
   XYLOPHONE.forEach((k, i) => {
     const x = padX + i * barW;
     const barH = (bottomY - topY) * (1 - i * 0.04);
@@ -1730,20 +1749,30 @@ function drawARXylophoneOverlay(ctx, W, H) {
     const isLit = keyHitStates[k.id] && (now - keyHitStates[k.id] < 180);
     const hoverVal = hoveredKeys[k.id] || 0;
 
-    const colors = ['#e63946', '#f4862e', '#f6c90e', '#2ec25c', '#1fa6c9', '#3654d1', '#8e3bc4'];
+    // Satin anodized tone bar finish
     ctx.fillStyle = isLit ? '#FFFFFF' : colors[i % colors.length];
-    ctx.globalAlpha = isLit ? 1.0 : (0.75 + hoverVal * 0.25);
+    ctx.globalAlpha = isLit ? 1.0 : (0.80 + hoverVal * 0.20);
     ctx.fillRect(x + 3, y, barW - 6, barH);
     ctx.globalAlpha = 1.0;
 
-    ctx.strokeStyle = '#FFFFFF';
-    ctx.lineWidth = isLit ? 2 : 1;
+    ctx.strokeStyle = isLit ? '#C084FC' : (hoverVal > 0 ? '#FFFFFF' : 'rgba(255, 255, 255, 0.35)');
+    ctx.lineWidth = isLit ? 2.5 : 1;
     ctx.strokeRect(x + 3, y, barW - 6, barH);
 
+    // Dual Nodal Pin Dampers (Teenage Engineering style)
+    ctx.fillStyle = isLit ? '#000000' : 'rgba(255, 255, 255, 0.7)';
+    ctx.beginPath();
+    ctx.arc(x + barW / 2, y + barH * 0.22, 2.5, 0, Math.PI * 2);
+    ctx.arc(x + barW / 2, y + barH * 0.78, 2.5, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Pitch & Frequency Labels
     ctx.fillStyle = isLit ? '#000000' : '#FFFFFF';
-    ctx.font = '700 12px "IBM Plex Mono", monospace';
+    ctx.font = isLit ? '800 13px "IBM Plex Mono", monospace' : '700 12px "IBM Plex Mono", monospace';
     ctx.textAlign = 'center';
-    ctx.fillText(k.label, x + barW / 2, bottomY - 14);
+    ctx.fillText(k.label, x + barW / 2, bottomY - 16);
+    ctx.font = '600 7.5px "IBM Plex Mono", monospace';
+    ctx.fillText(Math.round(k.freq) + 'Hz', x + barW / 2, bottomY - 6);
   });
   ctx.restore();
 }
