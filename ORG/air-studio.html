@@ -1252,6 +1252,12 @@ function buildUI() {
     document.getElementById('piano-keys').classList.remove('gone');
     document.getElementById('piano-keys').classList.toggle('mini', layoutMode === 'mini');
     buildXylophoneKeys();
+  } else if (currentInst === 'tamte') {
+    document.getElementById('right-title').textContent = 'TAMTE & DOLLU (FOLK PERCUSSION)';
+    document.getElementById('f-inst').textContent = 'TAMTE & DOLLU';
+    document.getElementById('pad-grid').classList.remove('gone');
+    document.getElementById('piano-keys').classList.add('gone');
+    buildTamtePads();
   }
 }
 
@@ -1327,6 +1333,66 @@ function triggerDrumHit(drumId, velocity=1, x=null, y=null) {
   });
 
   onHit(drum.label, drum.id, velocity);
+}
+
+function getTamteSVG(id) {
+  if (id === 'dollu') {
+    return `<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="8"/><path d="M4 12h16M12 4v16"/></svg>`;
+  }
+  return `<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8"><ellipse cx="12" cy="12" rx="9" ry="5"/><path d="M7 16l5-4 5 4"/></svg>`;
+}
+
+function buildTamtePads() {
+  const grid = document.getElementById('pad-grid');
+  grid.innerHTML = '';
+  grid.style.display = 'grid';
+  grid.style.gridTemplateColumns = 'repeat(2, 1fr)';
+  grid.style.gap = '8px';
+
+  TAMTE_KIT.forEach(p => {
+    const d = document.createElement('div');
+    d.className = 'pad drum-pad';
+    d.id = 'pad-' + p.id;
+    d.onclick = () => triggerTamteHit(p.id, 1);
+    const iconSVG = getTamteSVG(p.id);
+    const bg = `radial-gradient(circle at 50% 25%, ${p.color}33 0%, rgba(20, 12, 6, 0.95) 85%)`;
+    d.innerHTML = `
+      <div class="drum-body" style="background:${bg}; border-color:${p.ring};"></div>
+      <div class="drum-rim" style="border-color:${p.color}88;"></div>
+      <div class="drum-center" style="color:${p.color};">
+        <div class="pad-icon">${iconSVG}</div>
+      </div>
+      <div class="pad-label">${p.label} <span style="color:${p.color};">[${p.key}]</span></div>
+    `;
+    grid.appendChild(d);
+  });
+}
+
+function triggerTamteHit(id, velocity=1, x=null, y=null) {
+  const pad = TAMTE_KIT.find(d => d.id === id);
+  if (!pad) return;
+  playTamteSound(id, velocity);
+  tamteHitStates[id] = performance.now();
+
+  const padEl = document.getElementById('pad-' + id);
+  if (padEl) {
+    padEl.classList.add('lit');
+    setTimeout(() => padEl.classList.remove('lit'), 130);
+  }
+
+  const canvas = document.getElementById('draw-canvas');
+  const rippleX = x !== null ? x : pad.cx * canvas.width;
+  const rippleY = y !== null ? y : pad.cy * canvas.height;
+  arHitRipples.push({
+    x: rippleX,
+    y: rippleY,
+    radius: 14,
+    maxRadius: pad.r * Math.min(canvas.width, canvas.height) * 1.4,
+    color: pad.ring,
+    alpha: 1.0
+  });
+
+  onHit(pad.label, pad.id, velocity);
 }
 
 function buildPianoKeys() {
