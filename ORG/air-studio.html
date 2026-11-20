@@ -1547,6 +1547,8 @@ function drawFrame(handResults) {
     drawARDrumsOverlay(ctx, W, H);
   } else if (currentInst === 'xylophone') {
     drawARXylophoneOverlay(ctx, W, H);
+  } else if (currentInst === 'tamte') {
+    drawARTamteOverlay(ctx, W, H);
   }
 
   // 3. Draw AR Hit Ripples
@@ -1916,6 +1918,72 @@ function drawARXylophoneOverlay(ctx, W, H) {
     ctx.fillText(k.label, x + barW / 2, bottomY - 16);
     ctx.font = '600 7.5px "IBM Plex Mono", monospace';
     ctx.fillText(Math.round(k.freq) + 'Hz', x + barW / 2, bottomY - 6);
+  });
+  ctx.restore();
+}
+
+function drawARTamteOverlay(ctx, W, H) {
+  const now = performance.now();
+  const minDim = Math.min(W, H);
+
+  ctx.save();
+  TAMTE_KIT.forEach(pad => {
+    const cx = pad.cx * W;
+    const cy = pad.cy * H;
+    const r = pad.r * minDim;
+    const isLit = tamteHitStates[pad.id] && (now - tamteHitStates[pad.id] < 160);
+    const hoverVal = hoveredTamte[pad.id] || 0;
+
+    ctx.save();
+    ctx.translate(cx, cy);
+
+    // Outer Brass & Hardwood Resonator Rim
+    ctx.beginPath();
+    ctx.arc(0, 0, r, 0, Math.PI * 2);
+    ctx.fillStyle = isLit ? '#FFFFFF' : '#180E06';
+    ctx.fill();
+    ctx.strokeStyle = isLit ? '#FFFFFF' : (hoverVal > 0 ? '#C084FC' : pad.ring);
+    ctx.lineWidth = Math.max(3, r * 0.08);
+    ctx.stroke();
+
+    // Goat-Leather Stretched Membrane Head
+    const headGrad = ctx.createRadialGradient(0, 0, r * 0.15, 0, 0, r * 0.88);
+    if (isLit) {
+      headGrad.addColorStop(0, '#FFFFFF');
+      headGrad.addColorStop(0.4, '#FDE047');
+      headGrad.addColorStop(1, '#EA580C');
+    } else {
+      headGrad.addColorStop(0, '#F59E0B');
+      headGrad.addColorStop(0.5, pad.color);
+      headGrad.addColorStop(1, '#3B1705');
+    }
+    ctx.beginPath();
+    ctx.arc(0, 0, r * 0.88, 0, Math.PI * 2);
+    ctx.fillStyle = headGrad;
+    ctx.fill();
+
+    // Traditional Tension Rope Spokes
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.25)';
+    ctx.lineWidth = 1;
+    for (let a = 0; a < Math.PI * 2; a += Math.PI / 6) {
+      ctx.beginPath();
+      ctx.moveTo(Math.cos(a) * r * 0.88, Math.sin(a) * r * 0.88);
+      ctx.lineTo(Math.cos(a) * r, Math.sin(a) * r);
+      ctx.stroke();
+    }
+
+    // Monospace Typography Badges
+    ctx.fillStyle = isLit ? '#000000' : '#FFFFFF';
+    ctx.font = '800 13px "IBM Plex Mono", monospace';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(pad.label, 0, -6);
+
+    ctx.font = '700 9.5px "IBM Plex Mono", monospace';
+    ctx.fillStyle = isLit ? '#000000' : pad.ring;
+    ctx.fillText(`KEY [${pad.key}]`, 0, 10);
+
+    ctx.restore();
   });
   ctx.restore();
 }
