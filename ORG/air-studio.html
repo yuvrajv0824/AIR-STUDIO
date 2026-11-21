@@ -2210,6 +2210,8 @@ function processHands(results) {
       processDrumsMultiFinger(landmarks, handLabel, W, H, now);
     } else if (currentInst === 'xylophone') {
       processXylophoneMultiFinger(landmarks, handLabel, W, H, now);
+    } else if (currentInst === 'tamte') {
+      processTamteMultiFinger(landmarks, handLabel, W, H, now);
     }
   });
 }
@@ -2372,6 +2374,69 @@ function processXylophoneMultiFinger(landmarks, handLabel, W, H, now) {
 
     fSt.prevY = tipY;
   });
+}
+
+function processTamteMultiFinger(landmarks, handLabel, W, H, now) {
+  const minDim = Math.min(W, H);
+  const fStateMap = multiFingerState[handLabel];
+  const wrist = landmarks[0];
+  const middleMcp = landmarks[9];
+  const handScalePx = Math.max(45, Math.hypot((middleMcp.x - wrist.x) * W, (middleMcp.y - wrist.y) * H));
+  const reArmThreshold = handScalePx * 0.08;
+  const normThreshold = Math.max(1.3, gestureThreshold * 28);
+
+  const strikerIndices = [8, 12];
+  let hitTriggered = false;
+
+  for (const fIdx of strikerIndices) {
+    const lm = landmarks[fIdx];
+    const rawTipX = (1 - lm.x) * W;
+    const rawTipY = lm.y * H;
+    const fSt = fStateMap[fIdx];
+
+    if (!fSt.smoothTipX) {
+      fSt.smoothTipX = rawTipX;
+      fSt.smoothTipY = rawTipY;
+    } else {
+      fSt.smoothTipX += 0.70 * (rawTipX - fSt.smoothTipX);
+      fSt.smoothTipY += 0.70 * (rawTipY - fSt.smoothTipY);
+    }
+    const tipX = fSt.smoothTipX;
+    const tipY = fSt.smoothTipY;
+
+    const dtMs = fSt.lastTime > 0 ? Math.max(8, Math.min(50, now - fSt.lastTime)) : 16.6;
+    const deltaY = fSt.prevTipY !== null && fSt.prevTipY !== undefined ? (tipY - fSt.prevTipY) : 0;
+    const normVel = ((deltaY / handScalePx) / (dtMs / 1000));
+    const isDownward = normVel > normThreshold;
+
+    let targetPad = null;
+    for (const d of TAMTE_KIT) {
+      const dx = tipX - d.cx * W;
+      const dy = tipY - d.cy * H;
+      if (dx * dx + dy * dy <= (d.r * minDim) ** 2) {
+        targetPad = d;
+        hoveredTamte[d.id] = Math.max(hoveredTamte[d.id] || 0, 0.85);
+        break;
+      }
+    }
+
+    if (targetPad && isDownward && fSt.armed && !hitTriggered) {
+      if (canFire(`tm_${targetPad.id}_${handLabel}`)) {
+        triggerTamteHit(targetPad.id, Math.min(1.5, normVel / 2), tipX, tipY);
+        fSt.armed = false;
+        fSt.lockedKeyId = targetPad.id;
+        if (handLabel === 'right') glowR = 1; else glowL = 1;
+        hitTriggered = true;
+      }
+    } else if (deltaY < -reArmThreshold) {
+      fSt.armed = true;
+      fSt.lockedKeyId = null;
+    }
+
+    fSt.prevTipY = tipY;
+    fSt.prevY = tipY;
+    fSt.lastTime = now;
+  }
 }
 
 function onHit(name, padId, velocity=1) {
