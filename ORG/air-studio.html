@@ -1540,6 +1540,18 @@ function drawFrame(handResults) {
   ctx.fillStyle = currentInst === 'drums' ? 'rgba(5, 7, 10, 0.22)' : 'rgba(5, 7, 10, 0.28)';
   ctx.fillRect(0, 0, W, H);
 
+  // 1b. Google ARCore Comfort Zone Boundary Ticks (Active 80% Stage Zone)
+  ctx.save();
+  ctx.strokeStyle = 'rgba(196, 181, 253, 0.18)';
+  ctx.lineWidth = 1;
+  const zLeft = W * 0.08, zRight = W * 0.92, zTop = H * 0.12, zBottom = H * 0.94;
+  const tLen = 14;
+  ctx.beginPath(); ctx.moveTo(zLeft, zTop + tLen); ctx.lineTo(zLeft, zTop); ctx.lineTo(zLeft + tLen, zTop); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(zRight - tLen, zTop); ctx.lineTo(zRight, zTop); ctx.lineTo(zRight, zTop + tLen); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(zLeft, zBottom - tLen); ctx.lineTo(zLeft, zBottom); ctx.lineTo(zLeft + tLen, zBottom); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(zRight - tLen, zBottom); ctx.lineTo(zRight, zBottom); ctx.lineTo(zRight, zBottom - tLen); ctx.stroke();
+  ctx.restore();
+
   // 2. Draw Interactive AR Instrument Overlay (Bottom 60-70% of Stage)
   if (currentInst === 'piano') {
     drawARPianoOverlay(ctx, W, H);
@@ -2219,6 +2231,10 @@ function processHands(results) {
 function processPianoMultiFinger(landmarks, handLabel, W, H, now) {
   const geom = getARPianoGeometry(W, H);
   const fStateMap = multiFingerState[handLabel];
+  const wrist = landmarks[0];
+  const middleMcp = landmarks[9];
+  const handScalePx = Math.max(45, Math.hypot((middleMcp.x - wrist.x) * W, (middleMcp.y - wrist.y) * H));
+  const reArmThreshold = handScalePx * 0.08;
   const velThreshold = Math.max(4.2, gestureThreshold * H * 0.16);
 
   FINGER_LANDMARKS.forEach(fIdx => {
@@ -2231,10 +2247,16 @@ function processPianoMultiFinger(landmarks, handLabel, W, H, now) {
     fSt.velocity = Math.max(0, deltaY);
     const isDownward = deltaY > velThreshold;
 
-    // Check Key Hover with 2px inner safety inset so hand tilt does not hit neighbor keys
-    let targetedKey = geom.blackBoxes.find(b => tipX >= (b.x1 + 1.5) && tipX <= (b.x2 - 1.5) && tipY >= b.y1 && tipY <= b.y2);
+    // Check Key Hover with lateral deadzones to prevent neighbor misfires
+    let targetedKey = geom.blackBoxes.find(b => {
+      const deadZone = Math.max(3.5, b.w * 0.10);
+      return tipX >= (b.x1 + deadZone) && tipX <= (b.x2 - deadZone) && tipY >= (b.y1 + 4) && tipY <= (b.y2 - 2);
+    });
     if (!targetedKey) {
-      targetedKey = geom.whiteBoxes.find(w => tipX >= (w.x1 + 2) && tipX <= (w.x2 - 2) && tipY >= w.y1 && tipY <= w.y2);
+      targetedKey = geom.whiteBoxes.find(w => {
+        const deadZone = Math.max(4.5, w.w * 0.08);
+        return tipX >= (w.x1 + deadZone) && tipX <= (w.x2 - deadZone) && tipY >= (geom.topY + 6) && tipY <= geom.bottomY;
+      });
     }
 
     // Hover guidance aura
@@ -2256,8 +2278,8 @@ function processPianoMultiFinger(landmarks, handLabel, W, H, now) {
         lastPianoHitHand[handLabel] = now;
         lastPianoHitKey[handLabel] = targetedKey.id;
       }
-    } else if (deltaY < -1.8 || tipY < geom.topY - 4) {
-      // Re-arm when finger lifts up from the keybed
+    } else if (deltaY < -reArmThreshold || tipY < geom.topY - 6) {
+      // Re-arm when finger lifts up by normalized threshold
       fSt.armed = true;
       fSt.targetId = null;
     }
