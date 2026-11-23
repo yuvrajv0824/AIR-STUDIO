@@ -278,9 +278,77 @@ input[type=range]#sens::-webkit-slider-thumb:hover { background:var(--acc); box-
 
 .ripple { position:absolute; border:2px solid #C084FC; border-radius:50%; opacity:0.85; pointer-events:none; }
 
-.shortcut-hint { position:fixed; bottom:20px; right:20px; z-index:50; background:rgba(8,8,8,0.95); border:2px solid var(--border); padding:12px 16px; border-radius:3px; font-size:8px; letter-spacing:2px; color:var(--dim); text-transform:uppercase; display:none; max-width:200px; }
-.shortcut-hint.show { display:block; animation:slideIn 0.3s ease; }
-@keyframes slideIn { from { transform:translateX(300px); opacity:0; } to { transform:translateX(0); opacity:1; } }
+/* Glassmorphic Shortcuts Dialog (Day 10 - Modern Web Guidance) */
+.shortcuts-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: rgba(10, 8, 18, 0.75);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+.shortcuts-modal.show { display: flex; }
+.shortcuts-card {
+  background: #151320;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.6);
+  max-width: 380px;
+  width: 100%;
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.shortcuts-hdr {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  padding-bottom: 8px;
+}
+.shortcuts-title {
+  font-size: 11px;
+  letter-spacing: 1.5px;
+  font-weight: 700;
+  color: var(--acc);
+}
+.shortcuts-close {
+  background: transparent;
+  border: none;
+  color: var(--dim);
+  font-size: 14px;
+  cursor: pointer;
+  padding: 2px 6px;
+}
+.shortcuts-close:hover { color: var(--fg); }
+.shortcuts-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px;
+  font-size: 9px;
+  letter-spacing: 1px;
+  color: var(--dim);
+}
+.shortcut-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.shortcut-key {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 8.5px;
+  font-weight: 700;
+  color: var(--acc);
+  background: rgba(192, 132, 252, 0.12);
+  border: 1px solid rgba(192, 132, 252, 0.3);
+  padding: 2px 6px;
+  border-radius: 3px;
+}
 
 @media (max-width:850px) and (min-width:601px) {
   .h-logo { padding:0 14px; font-size:25px; letter-spacing:3px; }
@@ -345,14 +413,26 @@ input[type=range]#sens::-webkit-slider-thumb:hover { background:var(--acc); box-
 <body>
 
 <div id="flash"></div>
-<div id="kb-hint">Press ? for shortcuts</div>
-<div class="shortcut-hint" id="shortcut-hint">
-  <div style="color:var(--acc);font-weight:700;margin-bottom:8px;">KEYBOARD SHORTCUTS</div>
-  <div>SPACE → Start/Stop</div>
-  <div>P → Pause/Resume</div>
-  <div>D / Shift+P / X → Switch Inst</div>
-  <div>F → Fullscreen</div>
-  <div>? → Hide hints</div>
+
+<!-- Glassmorphic Shortcuts Dialog (Day 10 - Modern Web Guidance) -->
+<div class="shortcuts-modal" id="shortcuts-modal" role="dialog" aria-modal="true" aria-labelledby="shortcuts-title-label">
+  <div class="shortcuts-card">
+    <div class="shortcuts-hdr">
+      <span class="shortcuts-title" id="shortcuts-title-label">KEYBOARD SHORTCUTS</span>
+      <button type="button" class="shortcuts-close" onclick="toggleShortcutsHint(false)" aria-label="Close shortcuts">&#x2715;</button>
+    </div>
+    <div class="shortcuts-grid">
+      <div class="shortcut-row"><span>Start / Stop Engine</span><span class="shortcut-key">SPACE</span></div>
+      <div class="shortcut-row"><span>Pause / Resume</span><span class="shortcut-key">P</span></div>
+      <div class="shortcut-row"><span>Switch to Drums</span><span class="shortcut-key">D</span></div>
+      <div class="shortcut-row"><span>Switch to Piano</span><span class="shortcut-key">SHIFT+P</span></div>
+      <div class="shortcut-row"><span>Switch to Xylophone</span><span class="shortcut-key">X</span></div>
+      <div class="shortcut-row"><span>Switch to Tamte Folk</span><span class="shortcut-key">T</span></div>
+      <div class="shortcut-row"><span>Switch to Plucked Strings</span><span class="shortcut-key">G / V</span></div>
+      <div class="shortcut-row"><span>Fullscreen</span><span class="shortcut-key">F</span></div>
+      <div class="shortcut-row"><span>Toggle Shortcuts Dialog</span><span class="shortcut-key">?</span></div>
+    </div>
+  </div>
 </div>
 
 <div id="modal-layer">
@@ -437,6 +517,9 @@ input[type=range]#sens::-webkit-slider-thumb:hover { background:var(--acc); box-
       <div class="h-cell"><span style="color:var(--dim);">SYS</span> <span class="h-val acc" id="f-sys">READY</span></div>
       <div class="h-cell" id="header-privacy-cell" onclick="togglePrivacy()" style="cursor:pointer;">
         <span style="color:var(--dim);">PRIVACY</span> <span class="h-val" id="lbl-privacy">OFF</span>
+      </div>
+      <div class="h-cell" id="header-shortcuts-cell" onclick="toggleShortcutsHint()" style="cursor:pointer;" title="Keyboard Shortcuts [?]" aria-controls="shortcuts-modal" aria-expanded="false">
+        <span style="color:var(--dim);">[?]</span> <span class="h-val acc">KEYS</span>
       </div>
     </div>
   </div>
@@ -2717,25 +2800,33 @@ document.addEventListener('keydown', (e) => {
     e.preventDefault();
     document.getElementById('app').requestFullscreen();
   }
-  else if (e.code === 'Slash') {
+  else if (e.code === 'Slash' || (e.key === '?' && !e.ctrlKey && !e.metaKey)) {
     e.preventDefault();
     toggleShortcutsHint();
   }
+  else if (e.key === 'Escape') {
+    const sModal = document.getElementById('shortcuts-modal');
+    if (sModal && sModal.classList.contains('show')) {
+      toggleShortcutsHint(false);
+    }
+  }
 });
 
-function toggleShortcutsHint() {
-  showShortcuts = !showShortcuts;
-  document.getElementById('shortcut-hint').classList.toggle('show', showShortcuts);
-  document.getElementById('kb-hint').classList.toggle('show', !showShortcuts);
+function toggleShortcutsHint(force) {
+  const modal = document.getElementById('shortcuts-modal');
+  if (!modal) return;
+  showShortcuts = typeof force === 'boolean' ? force : !showShortcuts;
+  modal.classList.toggle('show', showShortcuts);
+  const btn = document.getElementById('header-shortcuts-cell');
+  if (btn) btn.setAttribute('aria-expanded', String(showShortcuts));
 }
 
-document.addEventListener('mousemove', () => {
-  document.getElementById('kb-hint').classList.add('show');
-  if (keyboardHintTimer !== null) clearTimeout(keyboardHintTimer);
-  keyboardHintTimer = setTimeout(() => {
-    if (!showShortcuts) document.getElementById('kb-hint').classList.remove('show');
-    keyboardHintTimer = null;
-  }, 3000);
+// Light-dismiss: clicking outside shortcuts card dismisses it (Modern Web Guidance)
+document.addEventListener('click', (e) => {
+  const modal = document.getElementById('shortcuts-modal');
+  if (modal && modal.classList.contains('show') && e.target === modal) {
+    toggleShortcutsHint(false);
+  }
 });
 
 document.querySelectorAll('.inst-btn[data-inst]').forEach(button => {

@@ -21,3 +21,7 @@ EXP/
 GIT_PUSH_INFO.md
 AGENTS.md
 TASK.txt
+TASKS.md
+
+.agents/
+skills-lock.json
