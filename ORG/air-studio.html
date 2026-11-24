@@ -253,17 +253,17 @@ input[type=range]#sens::-webkit-slider-thumb:hover { background:var(--acc); box-
 .xylo-5 { background:#3654d1; }
 .xylo-6 { background:#8e3bc4; }
 
-#wf-wrap { padding:12px 14px; border-bottom:1px solid var(--border); flex-shrink:0; }
-#wf-canvas { width:100%; height:45px; display:block; background:#000; border:1px solid var(--border); border-radius:2px; }
+#wf-wrap { padding:10px 14px; border-bottom:1px solid var(--border); flex-shrink:0; }
+#wf-canvas { width:100%; height:48px; display:block; background:#0B0914; border:1px solid var(--border); border-radius:3px; }
 
-#stats-panel { padding:12px 14px; border-bottom:1px solid var(--border); flex-shrink:0; display:grid; grid-template-columns:1fr 1fr; gap:10px 12px; }
+#stats-panel { padding:10px 14px; border-bottom:1px solid var(--border); flex-shrink:0; display:grid; grid-template-columns:1fr 1fr; gap:10px 12px; }
 .stat-item { display:flex; flex-direction:column; gap:2px; }
 .stat-lbl { font-size:7px; letter-spacing:2px; color:var(--dim); text-transform:uppercase; font-weight:600; }
 .stat-val { font-family:'Bebas Neue',sans-serif; font-size:16px; color:var(--acc); font-weight:700; }
 
-#beat-wrap { flex:0 0 auto; padding:12px 14px; display:flex; flex-direction:column; justify-content:flex-end; gap:8px; }
-.bn { font-family:'Bebas Neue',sans-serif; font-size:68px; line-height:1; color:var(--fg); transition:all 0.1s; font-weight:700; }
-.bn.flash { color:var(--acc); filter:drop-shadow(0 0 8px var(--acc)); }
+#beat-wrap { flex:0 0 auto; padding:12px 14px; display:flex; flex-direction:column; justify-content:flex-end; gap:4px; }
+.bn { font-family:'Bebas Neue',sans-serif; font-size:56px; line-height:1; color:var(--fg); letter-spacing:2px; transition:all 0.1s; font-weight:700; }
+.bn.flash { color:var(--acc); filter:drop-shadow(0 0 10px var(--acc)); }
 
 #footer { border-top:1px solid var(--border); display:grid; grid-template-columns:repeat(7,1fr); background:var(--panel); }
 .fc { padding:4px 10px; border-right:1px solid var(--border); display:flex; flex-direction:column; justify-content:center; gap:2px; }
@@ -2568,33 +2568,41 @@ function onHit(name, padId, velocity=1) {
 function drawWaveform() {
   waveformFrameId = requestAnimationFrame(drawWaveform);
   const now = performance.now();
-  if (now - lastWaveformAt < 33) return;
+  if (now - lastWaveformAt < 30) return;
   lastWaveformAt = now;
   const canvas = document.getElementById('wf-canvas');
+  if (!canvas) return;
   const width = canvas.clientWidth || 200;
   if (canvas.width !== width) canvas.width = width;
-  if (canvas.height !== 45) canvas.height = 45;
+  if (canvas.height !== 48) canvas.height = 48;
   const ctx = canvas.getContext('2d');
-  const W = canvas.width, H = 45;
-  ctx.fillStyle = '#000';
+  const W = canvas.width, H = 48;
+
+  ctx.fillStyle = '#0B0914';
   ctx.fillRect(0, 0, W, H);
 
-  if (!analyser) {
-    ctx.strokeStyle = 'rgba(192,132,252,0.1)';
-    ctx.lineWidth = 1.2;
-    ctx.beginPath();
-    ctx.moveTo(0, H/2);
-    ctx.lineTo(W, H/2);
-    ctx.stroke();
-    return;
-  }
+  // 48px Oscilloscope Center Grid
+  ctx.strokeStyle = 'rgba(192, 132, 252, 0.12)';
+  ctx.lineWidth = 1;
+  ctx.setLineDash([2, 4]);
+  ctx.beginPath();
+  ctx.moveTo(0, H / 2);
+  ctx.lineTo(W, H / 2);
+  ctx.stroke();
+  ctx.setLineDash([]);
+
+  if (!analyser) return;
 
   if (!waveformData || waveformData.length !== analyser.frequencyBinCount) {
     waveformData = new Uint8Array(analyser.frequencyBinCount);
   }
   analyser.getByteTimeDomainData(waveformData);
+
+  // Dual-tone Cyber Waveform Ribbon
   ctx.strokeStyle = '#C084FC';
-  ctx.lineWidth = 1.5;
+  ctx.lineWidth = 1.8;
+  ctx.shadowColor = 'rgba(192, 132, 252, 0.35)';
+  ctx.shadowBlur = 6;
   ctx.beginPath();
   waveformData.forEach((v, i) => {
     const x = (i / waveformData.length) * W;
@@ -2602,6 +2610,7 @@ function drawWaveform() {
     i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
   });
   ctx.stroke();
+  ctx.shadowBlur = 0;
 }
 
 function updateRecordTime() {
