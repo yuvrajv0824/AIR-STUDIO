@@ -94,7 +94,7 @@ body { width:100%; height:100vh; overflow:hidden; background:var(--bg); color:va
 #app { display:grid; grid-template-rows:44px 1fr 3px; height:100vh; border:1px solid var(--border); }
 #bottom-bar { height:3px; background:linear-gradient(90deg, var(--border) 0%, rgba(192,132,252,0.6) 50%, var(--border) 100%); flex-shrink:0; }
 #header { display:flex; align-items:stretch; border-bottom:1px solid var(--border); background:#09090c; color:var(--fg); overflow-x:auto; overflow-y:hidden; flex-shrink:0; }
-.h-logo { font-family:'Bebas Neue',sans-serif; font-size:23px; letter-spacing:3px; background:#09090c; color:#C084FC; padding:0 18px; display:flex; align-items:center; border-right:1px solid var(--border); flex-shrink:0; font-weight:700; user-select:none; }
+.h-logo { font-family:'Bebas Neue',sans-serif; font-size:23px; letter-spacing:3px; background:#09090c; color:#C084FC; padding:0 18px; display:flex; align-items:center; border-right:1px solid var(--border); flex-shrink:0; font-weight:700; user-select:none; text-shadow:none; box-shadow:none; }
 .h-stats { display:flex; align-items:stretch; flex:1; overflow:hidden; }
 .h-cell { display:flex; align-items:center; justify-content:center; gap:7px; padding:0 10px; height:100%; flex:1; border-right:1px solid var(--border); font-size:8.5px; letter-spacing:1.5px; text-transform:uppercase; color:var(--dim); font-weight:600; white-space:nowrap; transition:all 0.15s; }
 .h-cell .h-val { color:#FFFFFF; font-weight:700; font-family:'IBM Plex Mono',monospace; font-size:11px; }
@@ -274,8 +274,6 @@ input[type=range]#sens::-webkit-slider-thumb:hover { background:var(--acc); box-
 .fv.ok { color:var(--green); }
 .fv.err { color:var(--red); }
 
-#flash { position:fixed; inset:0; z-index:999; background:var(--acc); opacity:0; pointer-events:none; transition:opacity 0.06s; }
-
 .ripple { position:absolute; border:2px solid #C084FC; border-radius:50%; opacity:0.85; pointer-events:none; }
 
 /* Glassmorphic Shortcuts Dialog (Day 10 - Modern Web Guidance) */
@@ -411,8 +409,6 @@ input[type=range]#sens::-webkit-slider-thumb:hover { background:var(--acc); box-
 </style>
 </head>
 <body>
-
-<div id="flash"></div>
 
 <!-- Glassmorphic Shortcuts Dialog (Day 10 - Modern Web Guidance) -->
 <div class="shortcuts-modal" id="shortcuts-modal" role="dialog" aria-modal="true" aria-labelledby="shortcuts-title-label">
@@ -2560,8 +2556,6 @@ function onHit(name, padId, velocity=1) {
   }
 
   showZone(name);
-  document.getElementById('flash').style.opacity = '0.04';
-  setTimeout(() => document.getElementById('flash').style.opacity = '0', 70);
   addLog('[HIT] ' + name + ' ' + Math.round(velocity * 100) + '%', 'hit');
 }
 
