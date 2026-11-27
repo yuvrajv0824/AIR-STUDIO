@@ -200,15 +200,6 @@ input[type=range]#sens::-webkit-slider-thumb:hover { background:var(--acc); box-
 #piano-keys.mini .pk.white { min-width:0; }
 #piano-keys.mini .pk.black { width:6.2%; }
 
-.drum-side-lbl { font-size:8px; letter-spacing:2px; color:var(--dim); text-transform:uppercase; font-weight:600; padding:0 3px; margin:0; }
-.drum-side-lbl.left-lbl { color:var(--blue); }
-.drum-side-lbl.right-lbl { color:var(--green); text-align:left; }
-
-.drum-side-lbl.left-lbl { grid-column:1; grid-row:1; }
-.drum-side-lbl.right-lbl { grid-column:2; grid-row:1; }
-.drum-cluster { display:grid; grid-template-columns:minmax(0,1fr); gap:8px; min-width:0; min-height:0; }
-.drum-cluster.left-cluster { grid-column:1; grid-row:2; }
-.drum-cluster.right-cluster { grid-column:2; grid-row:2; }
 .pad { position:relative; width:100%; aspect-ratio:1.8; min-height:46px; max-height:64px; min-width:0; display:flex; align-items:center; justify-content:center; cursor:pointer; transition:transform 0.12s cubic-bezier(0.05, 0.7, 0.1, 1.0), filter 0.12s; border-radius:8px; overflow:hidden; box-sizing:border-box; }
 .pad:hover { transform:translateY(-1px); filter:brightness(1.12); }
 
@@ -224,7 +215,6 @@ input[type=range]#sens::-webkit-slider-thumb:hover { background:var(--acc); box-
 .pad.lit { transform:scale(0.97); filter:brightness(1.35); }
 .pad.lit .drum-body { border-color:var(--acc); box-shadow:inset 0 0 10px rgba(192, 132, 252, 0.4); }
 
-#pad-grid[data-layout="mini"] .drum-cluster { gap:6px; }
 #pad-grid[data-layout="mini"] .pad-label { font-size:7px; }
 
 #piano-keys { display:flex; flex-shrink:0; position:relative; background:rgba(10,10,10,0.84); padding:0; height:150px; border:1px solid rgba(255,255,255,0.06); box-shadow:inset 0 0 30px rgba(0,0,0,0.35); }
@@ -245,13 +235,6 @@ input[type=range]#sens::-webkit-slider-thumb:hover { background:var(--acc); box-
 .pk.xylo { position:relative; flex:1; height:88px; border-radius:6px; display:flex; align-items:flex-end; justify-content:center; padding-bottom:10px; border:none; box-shadow:inset 0 3px 0 rgba(255,255,255,0.22), inset 0 -3px 0 rgba(0,0,0,0.35); transition:transform 0.08s cubic-bezier(0.05, 0.7, 0.1, 1.0), filter 0.08s; }
 .pk.xylo .pk-nm { color:rgba(0,0,0,0.72); font-weight:800; }
 .pk.xylo.lit { transform:translateY(2px); filter:brightness(1.35); box-shadow:0 0 16px 3px rgba(192,132,252,0.6); }
-.xylo-0 { background:#e63946; }
-.xylo-1 { background:#f4862e; }
-.xylo-2 { background:#f6c90e; }
-.xylo-3 { background:#2ec25c; }
-.xylo-4 { background:#1fa6c9; }
-.xylo-5 { background:#3654d1; }
-.xylo-6 { background:#8e3bc4; }
 
 #wf-wrap { padding:10px 14px; border-bottom:1px solid var(--border); flex-shrink:0; }
 #wf-canvas { width:100%; height:48px; display:block; background:#0B0914; border:1px solid var(--border); border-radius:3px; }
@@ -350,21 +333,19 @@ input[type=range]#sens::-webkit-slider-thumb:hover { background:var(--acc); box-
 
 @media (max-width:850px) and (min-width:601px) {
   .h-logo { padding:0 14px; font-size:25px; letter-spacing:3px; }
-  .h-tag { display:none; }
   .h-stats { flex:1; justify-content:flex-end; }
   .h-cell { padding:0 9px; gap:5px; letter-spacing:1px; }
   #body { grid-template-columns:190px minmax(0,1fr) 220px; }
   #right { overflow-x:hidden; overflow-y:auto; }
   #pad-grid { flex:0 0 auto; overflow:visible; }
   #beat-wrap { flex:0 0 auto; padding:8px 10px; }
-  .bn { font-size:44px; }
+  .bn { font-size:42px; }
 }
 
 @media (max-width:600px) {
   #app { grid-template-rows:44px minmax(0,1fr) 38px; border-width:0; }
   #header { border-bottom-width:2px; }
   .h-logo { padding:0 10px; font-size:22px; letter-spacing:2px; }
-  .h-tag { display:none; }
   .h-stats { flex:1; justify-content:flex-end; }
   .h-cell { padding:0 6px; gap:4px; font-size:7px; letter-spacing:0; }
   .h-cell:nth-child(n+3) { display:none; }
@@ -386,7 +367,6 @@ input[type=range]#sens::-webkit-slider-thumb:hover { background:var(--acc); box-
   #inst-switch { padding:6px; gap:4px; }
   .inst-btn { padding:6px 7px; font-size:8px; letter-spacing:1px; }
   #pad-grid { flex:0 0 auto; padding:6px; gap:6px; overflow:visible; }
-  .drum-cluster { gap:6px; }
   .drum-center { font-size:17px; }
   .pad-label { font-size:7px; }
   #piano-keys { height:100px; min-height:0; }
@@ -715,7 +695,6 @@ let glowR = 0, glowL = 0;
 let fpsFrames = 0, fpsLast = performance.now();
 let recordStartTime = 0;
 let showShortcuts = false;
-let keyboardHintTimer = null;
 let actualLatencyMs = 12;
 let cpuUsagePct = 18;
 
