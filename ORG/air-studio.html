@@ -331,6 +331,74 @@ input[type=range]#sens::-webkit-slider-thumb:hover { background:var(--acc); box-
   border-radius: 3px;
 }
 
+/* Thermal Gradient Splash Screen (Future Expansion Sprint - Task 1) */
+.splash-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  background: radial-gradient(ellipse at 50% 45%, rgba(192, 132, 252, 0.20) 0%, rgba(99, 102, 241, 0.10) 45%, #07060B 80%);
+  background-color: #07060B;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.45s ease, visibility 0.45s ease;
+  user-select: none;
+}
+.splash-screen.fade-out {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+.splash-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  text-align: center;
+}
+.splash-logo {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 54px;
+  letter-spacing: 6px;
+  color: #C084FC;
+  line-height: 1;
+  text-shadow: 0 0 24px rgba(192, 132, 252, 0.4);
+}
+.splash-sub {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 3px;
+  color: #A5B4FC;
+  text-transform: uppercase;
+}
+.splash-loader {
+  width: 140px;
+  height: 2px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 2px;
+  overflow: hidden;
+  margin-top: 10px;
+}
+.splash-bar {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, #A855F7, #C084FC, #38BDF8);
+  animation: splashProgress 1.1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+@keyframes splashProgress {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(0); }
+}
+.splash-status {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 7.5px;
+  letter-spacing: 1.5px;
+  color: var(--dim);
+}
+@media (prefers-reduced-motion: reduce) {
+  .splash-screen { display: none !important; }
+}
+
 @media (max-width:850px) and (min-width:601px) {
   .h-logo { padding:0 14px; font-size:25px; letter-spacing:3px; }
   .h-stats { flex:1; justify-content:flex-end; }
@@ -408,6 +476,18 @@ input[type=range]#sens::-webkit-slider-thumb:hover { background:var(--acc); box-
       <div class="shortcut-row"><span>Fullscreen</span><span class="shortcut-key">F</span></div>
       <div class="shortcut-row"><span>Toggle Shortcuts Dialog</span><span class="shortcut-key">?</span></div>
     </div>
+  </div>
+</div>
+
+<!-- Thermal Gradient Splash Screen (Future Expansion Sprint - Task 1) -->
+<div id="splash-screen" class="splash-screen" role="status" aria-label="System Initializing">
+  <div class="splash-content">
+    <div class="splash-logo">AIR//STUDIO</div>
+    <div class="splash-sub">CYBER SPATIAL WORKSTATION</div>
+    <div class="splash-loader">
+      <div class="splash-bar"></div>
+    </div>
+    <div class="splash-status" id="splash-status">INITIALIZING AUDIO DSP &middot; VISION ENGINE</div>
   </div>
 </div>
 
@@ -2970,6 +3050,19 @@ function syncPrivacyToggle(checked) {
 }
 
 document.getElementById('layout-mode-btn').addEventListener('click', toggleLayoutMode);
+
+// Auto-dismiss thermal gradient splash screen after boot sequence or user input
+function dismissSplashScreen() {
+  const splash = document.getElementById('splash-screen');
+  if (splash && !splash.classList.contains('fade-out')) {
+    splash.classList.add('fade-out');
+    setTimeout(() => { if (splash && splash.parentNode) splash.remove(); }, 500);
+  }
+}
+setTimeout(dismissSplashScreen, 1300);
+['click', 'keydown', 'touchstart'].forEach(evt => {
+  window.addEventListener(evt, dismissSplashScreen, { once: true, passive: true });
+});
 
 setSensitivity(gestureThreshold);
 </script>
